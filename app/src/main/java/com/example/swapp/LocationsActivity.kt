@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.view.animation.AnimationUtils
 import com.example.swapp.model.JsonParser
 import com.example.swapp.model.LocationsAdapter
 import com.google.android.gms.maps.model.LatLng
@@ -21,7 +22,7 @@ class LocationsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_locations)
 
         jsonParser = JsonParser(baseContext)
-        jsonParser.parseLocations()
+        jsonParser.readJsonParks()
 
         val sharedPref = getSharedPreferences(
             getString(R.string.mSharedPref), Context.MODE_PRIVATE) ?: return
@@ -30,18 +31,16 @@ class LocationsActivity : AppCompatActivity() {
         val currentLatLng = LatLng(currentLat.toDouble(),currentLong.toDouble())
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = LocationsAdapter(jsonParser.parkList,currentLatLng)
+        viewAdapter = LocationsAdapter(jsonParser.parkList,currentLatLng,baseContext)
 
         recyclerView = findViewById<RecyclerView>(R.id.recyclerView).apply {
-            // use this setting to improve performance if you know that changes
-            // in content do not change the layout size of the RecyclerView
+
+            val controller = AnimationUtils.loadLayoutAnimation(context,R.anim.animation_layout)
             setHasFixedSize(true)
-
-            // use a linear layout manager
             layoutManager = viewManager
-
-            // specify an viewAdapter (see also next example)
             adapter = viewAdapter
+            layoutAnimation = controller
+
 
         }
 

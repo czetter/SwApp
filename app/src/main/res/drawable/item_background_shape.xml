@@ -1,0 +1,10 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle" >
+
+    <solid android:color="@color/colorPrimaryDarkLighter" />
+
+    <corners
+            android:radius="@dimen/item_background_shape_corners"
+    />
+
+</shape>

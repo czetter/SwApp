@@ -5,20 +5,20 @@ import android.content.Context
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
-import android.support.v4.content.ContextCompat.getSystemService
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.example.swapp.MainActivity
 import com.example.swapp.R
+import com.example.swapp.data.Park
+import com.example.swapp.model.DistanceCalculator
 import com.example.swapp.model.JsonParser
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -49,14 +49,16 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
     private lateinit var locationCallback: LocationCallback
 
     private lateinit var jsonParser: JsonParser
-    private lateinit var currentLocation:LatLng
+    private lateinit var currentLocation: LatLng
+    private var nearestPark = Park("DefaultPark", 0.0, 0.0, false)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext)
         locationManager = mContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
+        jsonParser = JsonParser(mContext)
+        jsonParser.readJsonParks()
 
         createLocationRequest()
 
@@ -65,17 +67,10 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
                 for (location in locationResult.locations) {
-                    // Update UI with location data
-                    // ...
-                    Log.i("LocationResult", location.toString())
                     if (location != null) {
-                        val sharedPref = activity?.getSharedPreferences(
-                            getString(R.string.mSharedPref), Context.MODE_PRIVATE) ?: return
-                        with (sharedPref.edit()) {
-                            putString(getString(R.string.locationSavelat), location.latitude.toString())
-                            putString(getString(R.string.locationSavelong), location.longitude.toString())
-                            commit()
-                        }
+                        saveLocation(location)
+                        makeMyToast(location)
+
                         currentLocation = LatLng(location.latitude, location.longitude)
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, zoom))
                     }
@@ -83,7 +78,50 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
                 }
             }
         }
-        jsonParser = JsonParser(mContext)
+
+
+    }
+
+    fun makeMyToast(location: Location) {
+        if (nearestPark.name != getNarestPark(location).name) {
+            nearestPark = getNarestPark(location)
+            Snackbar.make(
+                activity!!.findViewById(android.R.id.content),
+                "${nearestPark.name} van a legközelebb. ", Snackbar.LENGTH_INDEFINITE
+            ).show()
+
+        }
+    }
+
+    fun saveLocation(location: Location) {
+        val sharedPref = activity?.getSharedPreferences(
+            getString(R.string.mSharedPref), Context.MODE_PRIVATE
+        ) ?: return
+        with(sharedPref.edit()) {
+            putString(getString(R.string.locationSavelat), location.latitude.toString())
+            putString(getString(R.string.locationSavelong), location.longitude.toString())
+            commit()
+        }
+    }
+
+    fun getNarestPark(location: Location): Park {
+        var distanceCalculator = DistanceCalculator()
+        var nearest = jsonParser.parkList[0]
+        var distance = distanceCalculator.distanceBetween(
+            LatLng(location.latitude, location.longitude),
+            LatLng(jsonParser.parkList[0].latitude,jsonParser.parkList[0].longitude)
+        )
+        for (i in 1 until jsonParser.parkList.size) {
+            var tmp = distanceCalculator.distanceBetween(
+                LatLng(location.latitude, location.longitude),
+                LatLng(jsonParser.parkList[0].latitude,jsonParser.parkList[0].longitude)
+            )
+            if (tmp < distance) {
+                distance = tmp
+                nearest = jsonParser.parkList[i]
+            }
+        }
+        return nearest
 
     }
 
@@ -222,10 +260,9 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
     }
 
     private fun addMarkers() {
-        jsonParser.parseLocations()
         for (i in 0 until jsonParser.parkList.size) {
             var actual = jsonParser.parkList[i]
-            mMap.addMarker(MarkerOptions().position(actual.latLng).title(actual.name))
+            mMap.addMarker(MarkerOptions().position(LatLng(actual.latitude,actual.longitude)).title(actual.name))
         }
     }
 

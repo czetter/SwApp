@@ -5,11 +5,15 @@ import com.google.android.gms.maps.model.LatLng
 class Park {
 
     var name: String = ""
-    var latLng:LatLng
+    var latitude: Double = 0.0
+    var longitude: Double = 0.0
+    var fav :Boolean = false
 
-    constructor(_name: String, _latitude: Double, _longitude: Double) {
+    constructor(_name: String, _latitude: Double, _longitude: Double, _fav : Boolean) {
         name = _name
-        latLng = LatLng(_latitude,_longitude)
+        latitude = _latitude
+        longitude = _longitude
+        fav = _fav
 
     }
 
