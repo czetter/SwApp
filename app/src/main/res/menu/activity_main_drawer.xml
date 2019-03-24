@@ -7,7 +7,7 @@
         <item
                 android:id="@+id/nav_locations"
                 android:icon="@drawable/ic_location"
-                android:title="Helyszínek"/>
+                android:title="@string/helyszinek"/>
     </group>
 
     <item android:title="@string/tovabbiak">
@@ -15,7 +15,7 @@
             <item
                     android:id="@+id/nav_info"
                     android:icon="@drawable/ic_info"
-                    android:title="Információ"/>
+                    android:title="@string/inform_ci"/>
         </menu>
     </item>
 

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SwApp</string>
     <string name="title_activity_maps">Map</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">Street Workout Park Finder</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
@@ -10,8 +10,11 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_deleteh">Map</string>
     <string name="tovabbiak">Továbbiak</string>
-    <string name="made_by">Készítette: Czetter Gábor Péter</string>
+    <string name="made_by">Czetter Gábor Péter</string>
     <string name="locationSavelat">locationSavelat</string>
     <string name="locationSavelong">locationSavelong</string>
     <string name="mSharedPref">mSharedPref</string>
+    <string name="helyszinek">Helyszínek</string>
+    <string name="inform_ci">Információ</string>
+    <string name="keszitette">Készítette:</string>
 </resources>

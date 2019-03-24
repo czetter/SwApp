@@ -2,10 +2,12 @@ package com.example.swapp.fragments
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
+import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
@@ -52,7 +54,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
     private lateinit var currentLocation: LatLng
     private var nearestPark = Park("DefaultPark", 0.0, 0.0, false)
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext)
@@ -69,7 +70,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
                 for (location in locationResult.locations) {
                     if (location != null) {
                         saveLocation(location)
-                        makeMyToast(location)
+                        makeMySnackbar(location)
 
                         currentLocation = LatLng(location.latitude, location.longitude)
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, zoom))
@@ -82,16 +83,21 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
 
     }
 
-    fun makeMyToast(location: Location) {
-        if (nearestPark.name != getNarestPark(location).name) {
-            nearestPark = getNarestPark(location)
+    fun makeMySnackbar(location: Location) {
+        if (nearestPark.name != getNearestPark(location).name) {
+            nearestPark = getNearestPark(location)
             Snackbar.make(
                 activity!!.findViewById(android.R.id.content),
                 "${nearestPark.name} van a legközelebb. ", Snackbar.LENGTH_INDEFINITE
-            ).show()
-
+            ).setAction("Útvonal") {
+                val uri = "google.navigation:q=" + nearestPark.latitude + "," + nearestPark.longitude
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+                context?.startActivity(intent)
+            }.show()
         }
+
     }
+
 
     fun saveLocation(location: Location) {
         val sharedPref = activity?.getSharedPreferences(
@@ -104,17 +110,18 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
         }
     }
 
-    fun getNarestPark(location: Location): Park {
+    private fun getNearestPark(location: Location): Park {
         var distanceCalculator = DistanceCalculator()
+
         var nearest = jsonParser.parkList[0]
         var distance = distanceCalculator.distanceBetween(
             LatLng(location.latitude, location.longitude),
-            LatLng(jsonParser.parkList[0].latitude,jsonParser.parkList[0].longitude)
+            LatLng(nearest.latitude, nearest.longitude)
         )
         for (i in 1 until jsonParser.parkList.size) {
             var tmp = distanceCalculator.distanceBetween(
                 LatLng(location.latitude, location.longitude),
-                LatLng(jsonParser.parkList[0].latitude,jsonParser.parkList[0].longitude)
+                LatLng(jsonParser.parkList[i].latitude, jsonParser.parkList[i].longitude)
             )
             if (tmp < distance) {
                 distance = tmp
@@ -126,7 +133,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
     }
 
     override fun onAttach(context: Context?) {
-        //context works
         super.onAttach(context)
         if (context != null)
             mContext = context
@@ -262,7 +268,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
     private fun addMarkers() {
         for (i in 0 until jsonParser.parkList.size) {
             var actual = jsonParser.parkList[i]
-            mMap.addMarker(MarkerOptions().position(LatLng(actual.latitude,actual.longitude)).title(actual.name))
+            mMap.addMarker(MarkerOptions().position(LatLng(actual.latitude, actual.longitude)).title(actual.name))
         }
     }
 

@@ -8,6 +8,7 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <uses-feature android:name="android.hardware.location.gps"/>
 
@@ -17,12 +18,14 @@
             android:roundIcon="@drawable/ic_icon"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".LocationsActivity">
+        <activity android:name=".LocationsActivity"
+        android:label="@string/helyszinek">
         </activity>
         <activity
                 android:name=".InfoActivity"
                 android:parentActivityName=".MainActivity"
-                android:theme="@style/AlertDialog.AppCompat">
+                android:label="@string/keszitette"
+                android:theme="@style/Theme.AppCompat.Light.Dialog">
         </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

@@ -1,32 +1,38 @@
 [
   {
     "name": "Margit sziget park",
-    "latitude": "47.515225",
-    "longitude": "19.043559",
-    "fav": "false"
+    "latitude": 47.515225,
+    "longitude": 19.043559,
+    "fav": false
   },
   {
     "name": "Városmajor utcai park",
-    "latitude": "47.506248",
-    "longitude": "19.016479",
-    "fav": "false"
+    "latitude": 47.506248,
+    "longitude": 19.016479,
+    "fav": false
   },
   {
     "name": "Goldmann téri park",
-    "latitude": "47.4781472",
-    "longitude": "19.0597256",
-    "fav": "false"
+    "latitude": 47.4781472,
+    "longitude": 19.0597256,
+    "fav": false
   },
   {
     "name": "Gépmadár utcai park",
-    "latitude": "47.5035896",
-    "longitude": "19.145244",
-    "fav": "true"
+    "latitude": 47.5035896,
+    "longitude": 19.145244,
+    "fav": true
   },
   {
     "name": "Frankfurt sétány park",
-    "latitude": "47.4772262",
-    "longitude": "19.041371",
-    "fav": "true"
+    "latitude": 47.4772262,
+    "longitude": 19.041371,
+    "fav": true
+  },
+  {
+    "name": "Puskás Tivadar Park",
+    "latitude": 47.2384247,
+    "longitude": 16.6102411,
+    "fav": true
   }
 ]
