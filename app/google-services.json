@@ -1,0 +1,44 @@
+{
+  "project_info": {
+    "project_number": "638658763498",
+    "firebase_url": "https://chrome-sum-230814.firebaseio.com",
+    "project_id": "chrome-sum-230814",
+    "storage_bucket": "chrome-sum-230814.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:638658763498:android:2241f45bb2d16b81",
+        "android_client_info": {
+          "package_name": "com.example.swapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "638658763498-1l026ovg9ql008iksfc4ni4g9ja5p9pu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.swapp",
+            "certificate_hash": "d81c9a59e435bb1f683dcf4c1bb6ab8a70769cc5"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUgoF7KOjN8fAyo9maqIlg0a87yaC8k2Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "638658763498-4s9hejd1hrvv7bnqjeo5kodb32fplbkb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
