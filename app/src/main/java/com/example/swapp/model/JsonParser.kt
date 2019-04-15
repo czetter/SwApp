@@ -1,6 +1,7 @@
 package com.example.swapp.model
 
 import android.content.Context
+import android.util.Log
 import com.example.swapp.data.Park
 import com.google.gson.Gson
 import org.json.JSONArray
@@ -25,6 +26,7 @@ class JsonParser(context: Context) {
         inputStream.read(buffer)
         inputStream.close()
         jsonString = String(buffer, charset("UTF-8"))
+       // Log.d("PARSER:",jsonString)
         var jsonArray = JSONArray(jsonString)
 
         for (i in 0 until jsonArray.length()) {

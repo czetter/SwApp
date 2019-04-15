@@ -12,9 +12,10 @@ import android.net.Uri
 import android.widget.ImageView
 import com.example.swapp.R
 import java.util.*
+import kotlin.collections.ArrayList
 
 
-class LocationsAdapter(val parkList: MutableList<Park>) :
+class LocationsAdapter(val parkList: ArrayList<Park>) :
     RecyclerView.Adapter<LocationsAdapter.ViewHolder>() {
 
 

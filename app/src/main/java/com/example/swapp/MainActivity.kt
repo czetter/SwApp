@@ -1,11 +1,16 @@
 package com.example.swapp
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.SharedMemory
+import android.provider.ContactsContract
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.example.swapp.database.DatabaseManager
@@ -21,6 +26,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+
+        FirebaseApp.initializeApp(baseContext)
+
+
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
@@ -29,11 +38,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         nav_view.setNavigationItemSelectedListener(this)
 
-        FirebaseApp.initializeApp(baseContext)
-        val dbsm = DatabaseManager()
-        dbsm.loadParks()
 
 
+
+
+    }
+
+    fun clearSharedPreferences(){
+        var shp = getSharedPreferences("parks", Context.MODE_PRIVATE)
+        var editor = shp.edit()
+        editor.clear()
+        editor.commit()
     }
 
 

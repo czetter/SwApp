@@ -7,16 +7,18 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.animation.AnimationUtils
 import com.example.swapp.data.Park
+import com.example.swapp.database.DatabaseManager
 import com.example.swapp.model.DistanceCalculator
-import com.example.swapp.model.JsonParser
 import com.example.swapp.model.LocationsAdapter
 import com.google.android.gms.maps.model.LatLng
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class LocationsActivity : AppCompatActivity() {
 
-    private lateinit var jsonParser: JsonParser
+    private lateinit var databaseManager: DatabaseManager
+    private var parkList = ArrayList<Park>()
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -26,8 +28,10 @@ class LocationsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_locations)
 
-        jsonParser = JsonParser(baseContext)
-        jsonParser.readJsonParks()
+        databaseManager = DatabaseManager(baseContext)
+        parkList = databaseManager.getParks()
+
+
 
         val sharedPref = getSharedPreferences(
             getString(R.string.mSharedPref), Context.MODE_PRIVATE) ?: return
@@ -39,7 +43,7 @@ class LocationsActivity : AppCompatActivity() {
         sortLocationsByDistance()
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = LocationsAdapter(jsonParser.parkList)
+        viewAdapter = LocationsAdapter(parkList)
 
         recyclerView = findViewById<RecyclerView>(R.id.recyclerView).apply {
 
@@ -56,7 +60,7 @@ class LocationsActivity : AppCompatActivity() {
 
 
     private fun sortLocationsByDistance() {
-        Collections.sort(jsonParser.parkList, object : Comparator<Park> {
+        Collections.sort(parkList, object : Comparator<Park> {
             override fun compare(o1: Park, o2: Park): Int {
                 return o1.distance.compareTo(o2.distance)
             }
@@ -65,7 +69,7 @@ class LocationsActivity : AppCompatActivity() {
     }
 
     private fun calculateDistances(currentLatLng:LatLng){
-        for(park in jsonParser.parkList){
+        for(park in parkList){
             var distance = distanceCalculator.distanceBetween(LatLng(park.latitude, park.longitude), currentLatLng)
             park.distance = String.format("%.3f", distance).toDouble()
         }

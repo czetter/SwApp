@@ -20,6 +20,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.example.swapp.R
 import com.example.swapp.data.Park
+import com.example.swapp.database.DatabaseManager
 import com.example.swapp.model.DistanceCalculator
 import com.example.swapp.model.JsonParser
 import com.google.android.gms.common.api.ResolvableApiException
@@ -50,7 +51,8 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
 
-    private lateinit var jsonParser: JsonParser
+    private lateinit var databaseManager: DatabaseManager
+    private lateinit var parkList :ArrayList<Park>
     private lateinit var currentLocation: LatLng
     private var nearestPark = Park("DefaultPark", 0.0, 0.0, false)
 
@@ -58,9 +60,10 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
         super.onCreate(savedInstanceState)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext)
         locationManager = mContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        jsonParser = JsonParser(mContext)
-        jsonParser.readJsonParks()
-
+        databaseManager = DatabaseManager(mContext)
+        val dbsm = DatabaseManager(mContext)
+        dbsm.loadParks()
+        parkList = dbsm.getParks()
         createLocationRequest()
 
 
@@ -71,6 +74,10 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
                     if (location != null) {
                         saveLocation(location)
                         makeMySnackbar(location)
+                        if(parkList.isEmpty()) {
+                            parkList = dbsm.getParks()
+                            addMarkers()
+                        }
 
                         currentLocation = LatLng(location.latitude, location.longitude)
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, zoom))
@@ -112,20 +119,21 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
 
     private fun getNearestPark(location: Location): Park {
         var distanceCalculator = DistanceCalculator()
-
-        var nearest = jsonParser.parkList[0]
+        if(parkList.size == 0)
+            return Park("Loading..",0.0,0.0,false)
+        var nearest = parkList[0]
         var distance = distanceCalculator.distanceBetween(
             LatLng(location.latitude, location.longitude),
             LatLng(nearest.latitude, nearest.longitude)
         )
-        for (i in 1 until jsonParser.parkList.size) {
+        for (i in 1 until parkList.size) {
             var tmp = distanceCalculator.distanceBetween(
                 LatLng(location.latitude, location.longitude),
-                LatLng(jsonParser.parkList[i].latitude, jsonParser.parkList[i].longitude)
+                LatLng(parkList[i].latitude, parkList[i].longitude)
             )
             if (tmp < distance) {
                 distance = tmp
-                nearest = jsonParser.parkList[i]
+                nearest = parkList[i]
             }
         }
         return nearest
@@ -266,8 +274,8 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
     }
 
     private fun addMarkers() {
-        for (i in 0 until jsonParser.parkList.size) {
-            var actual = jsonParser.parkList[i]
+        for (i in 0 until parkList.size) {
+            var actual = parkList[i]
             mMap.addMarker(MarkerOptions().position(LatLng(actual.latitude, actual.longitude)).title(actual.name))
         }
     }
