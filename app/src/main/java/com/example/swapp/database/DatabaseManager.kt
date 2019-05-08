@@ -1,6 +1,7 @@
 package com.example.swapp.database
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import android.widget.Toast
 import com.example.swapp.data.Park
@@ -13,24 +14,30 @@ import kotlin.collections.ArrayList
 
 class DatabaseManager(val context: Context) {
     val TAG = "DBSM"
+    val REF = "parks"
+    var loading = true
     private var parkList = ArrayList<Park>()
 
     fun loadParks() {
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+
         var parksDatabase = FirebaseDatabase.getInstance()
-        var parksDatabaseReference = parksDatabase.getReference("parks")
+        var parksDatabaseReference = parksDatabase.getReference(REF)
         parksDatabaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
+                clearSharedPreferences()
                 var snapshotIterator = dataSnapshot.children
                 var iterator = snapshotIterator.iterator()
                 while (iterator.hasNext()) {
                     var snapshot = iterator.next()
                     var currentPark = snapshot.getValue(Park::class.java)
-                    if (currentPark != null)
+                    if (currentPark != null) {
                         parkList.add(currentPark)
+                    }
+
                 }
-                checkSavedData()
+
                 saveData()
+                loading = false
             }
 
             override fun onCancelled(p0: DatabaseError) {
@@ -40,25 +47,10 @@ class DatabaseManager(val context: Context) {
         })
 
     }
-    fun checkSavedData(){
-        var sharedPreferencesParks = getParks()
-        if(sharedPreferencesParks != parkList)
-            clearSharedPreferences()
-
-    }
-
-    fun upload(list: MutableList<Park>) {
-        val dbRef = FirebaseDatabase.getInstance().reference.child("parks")
-
-        for (p in list) {
-            var key = dbRef.push().key
-            FirebaseDatabase.getInstance().reference.child(key!!).setValue(p)
-        }
-    }
 
     private fun saveData() {
         Log.d(TAG, "saveData")
-        var sharedPreferences = context.getSharedPreferences("parks", Context.MODE_PRIVATE)
+        var sharedPreferences = context.getSharedPreferences(REF, Context.MODE_PRIVATE)
         var editor = sharedPreferences.edit()
         var gson = Gson()
         var json = gson.toJson(parkList)
@@ -67,24 +59,65 @@ class DatabaseManager(val context: Context) {
     }
 
     fun getParks(): ArrayList<Park> {
-        Log.d(TAG,"getParks")
-        var sharedPreferences = context.getSharedPreferences("parks", Context.MODE_PRIVATE)
+        Log.d(TAG, "getParks")
+        var sharedPreferences = context.getSharedPreferences(REF, Context.MODE_PRIVATE)
         var gson = Gson()
         var json = sharedPreferences.getString("parkList", "Error")
-        if(json == "Error")
+        if (json == "Error")
             return ArrayList<Park>()
         val type = object : TypeToken<ArrayList<Park>>() {}.type
-        return gson.fromJson(json,type) as ArrayList<Park>
+        return gson.fromJson(json, type) as ArrayList<Park>
 
     }
 
-    fun clearSharedPreferences(){
-        var shp = context.getSharedPreferences("parks", Context.MODE_PRIVATE)
-        var editor = shp.edit()
-        editor.clear()
-        editor.commit()
+    fun clearSharedPreferences() {
+        var sharedPreferences = context.getSharedPreferences(REF, Context.MODE_PRIVATE)
+        var editor = sharedPreferences.edit()
+        editor.remove("parkList")
+        editor.apply()
     }
 
+    fun addRating(num: Int, parkName: String) {
+        var parksDatabase = FirebaseDatabase.getInstance()
+        var parksDatabaseReference = parksDatabase.reference.child(REF)
+        parksDatabaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                var snapshotIterator = dataSnapshot.children
+                var iterator = snapshotIterator.iterator()
+                while (iterator.hasNext()) {
+                    var snapshot = iterator.next()
+                    var currentPark = snapshot.getValue(Park::class.java)
+                    if (currentPark != null)
+                        if (currentPark.name == parkName) {
+                            currentPark.votes[num - 1]++
+                            var key = snapshot.key
+                            parksDatabaseReference.child(key!!).setValue(currentPark)
+                        }
+
+                }
+                loadParks()
+
+            }
+
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+        })
+    }
+
+    fun refresh() {
+        clearSharedPreferences()
+        loadParks()
+    }
+
+    fun addPark(newPark: Park) {
+        var parksDatabase = FirebaseDatabase.getInstance()
+        var parksDatabaseReference = parksDatabase.reference.child(REF)
+
+        var key = parksDatabaseReference.push().key
+        parksDatabaseReference.child(key!!).setValue(newPark)
+    }
 
 
 }

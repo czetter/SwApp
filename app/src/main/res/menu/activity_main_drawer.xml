@@ -8,6 +8,10 @@
                 android:id="@+id/nav_locations"
                 android:icon="@drawable/ic_location"
                 android:title="@string/helyszinek"/>
+        <item
+                android:id="@+id/nav_add"
+                android:icon="@drawable/ic_add"
+                android:title="@string/parkadd"/>
     </group>
 
     <item android:title="@string/tovabbiak">

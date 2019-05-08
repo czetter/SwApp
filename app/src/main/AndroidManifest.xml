@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools" package="com.example.swapp">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.example.swapp">
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -8,7 +9,7 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <uses-feature android:name="android.hardware.location.gps"/>
@@ -20,14 +21,11 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".LocationsActivity"
-        android:label="@string/helyszinek">
-        </activity>
+
         <activity
-                android:name=".InfoActivity"
-                android:parentActivityName=".MainActivity"
-                android:label="@string/keszitette"
-                android:theme="@style/Theme.AppCompat.Light.Dialog">
+                android:name=".LocationsActivity"
+                android:label="@string/helyszinek"
+                android:theme="@style/noAnimTheme">
         </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

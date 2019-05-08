@@ -2,33 +2,38 @@ package com.example.swapp
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.os.SharedMemory
-import android.provider.ContactsContract
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import com.example.swapp.database.DatabaseManager
+import com.example.swapp.data.Park
+import com.example.swapp.fragments.AddParkFragment
+import com.example.swapp.fragments.InfoFragment
 import com.google.firebase.FirebaseApp
+import com.google.firebase.database.FirebaseDatabase
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
+    companion object {
+        var init = true
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (init) {
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+            init = !init
+        }
+
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-
-
         FirebaseApp.initializeApp(baseContext)
-
 
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -39,17 +44,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setNavigationItemSelectedListener(this)
 
 
-
-
-
     }
 
-    fun clearSharedPreferences(){
-        var shp = getSharedPreferences("parks", Context.MODE_PRIVATE)
-        var editor = shp.edit()
-        editor.clear()
-        editor.commit()
-    }
 
 
     override fun onBackPressed() {
@@ -75,16 +71,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_locations -> {
-                var intent = Intent(this,LocationsActivity::class.java)
+                var intent = Intent(this, LocationsActivity::class.java)
                 startActivity(intent)
             }
             R.id.nav_info -> {
-                var intent = Intent(this,InfoActivity::class.java)
-                startActivity(intent)
+                showInfoDialog()
+            }
+            R.id.nav_add -> {
+                showAddDialog()
             }
         }
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private fun showInfoDialog() {
+        var dialog = InfoFragment()
+        dialog.show(supportFragmentManager, "Info")
+    }
+
+    private fun showAddDialog() {
+        var dialog = AddParkFragment()
+        dialog.show(supportFragmentManager, "Info")
     }
 }

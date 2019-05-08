@@ -17,4 +17,9 @@
     <string name="helyszinek">Helyszínek</string>
     <string name="inform_ci">Információ</string>
     <string name="keszitette">Készítette:</string>
+    <string name="chooseabove">Please choose above</string>
+    <string name="loading">Loading..</string>
+    <string name="finelocationerror">ACCESS_FINE_LOCATION permission is not granted</string>
+    <string name="parkadd">Park hozzáadása</string>
+    <string name="added_restart">Park added, restart the application!</string>
 </resources>

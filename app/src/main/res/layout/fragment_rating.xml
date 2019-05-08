@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="How do you like this park?"
+              android:layout_gravity="center"
+              android:layout_margin="10dp"
+              android:textSize="20dp"/>
+
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+                  android:layout_gravity="center"
+                  android:layout_margin="10dp">
+
+        <ImageView android:layout_width="@dimen/star_size"
+                   android:layout_height="@dimen/star_size"
+                   android:id="@+id/star1"
+                   android:src="@drawable/ic_star_empty"/>
+
+        <ImageView android:layout_width="@dimen/star_size"
+                   android:layout_height="@dimen/star_size"
+                   android:id="@+id/star2"
+                   android:src="@drawable/ic_star_empty"/>
+
+        <ImageView android:layout_width="@dimen/star_size"
+                   android:layout_height="@dimen/star_size"
+                   android:id="@+id/star3"
+                   android:src="@drawable/ic_star_empty"/>
+
+        <ImageView android:layout_width="@dimen/star_size"
+                   android:layout_height="@dimen/star_size"
+                   android:id="@+id/star4"
+                   android:src="@drawable/ic_star_empty"/>
+
+        <ImageView android:layout_width="@dimen/star_size"
+                   android:layout_height="@dimen/star_size"
+                   android:id="@+id/star5"
+                   android:src="@drawable/ic_star_empty"/>
+
+
+    </LinearLayout>
+
+    <Button android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Submit"
+            android:layout_gravity="center"
+            android:id="@+id/btnSubmit"
+    />
+
+</LinearLayout>

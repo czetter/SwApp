@@ -1,6 +1,7 @@
 package com.example.swapp.fragments
 
 import android.Manifest
+import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
@@ -33,6 +34,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.Task
 import kotlinx.android.synthetic.main.fragment_map.*
+import java.sql.Time
 
 
 class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
@@ -52,9 +54,11 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
     private lateinit var locationCallback: LocationCallback
 
     private lateinit var databaseManager: DatabaseManager
-    private lateinit var parkList :ArrayList<Park>
+    private lateinit var parkList: ArrayList<Park>
     private lateinit var currentLocation: LatLng
-    private var nearestPark = Park("DefaultPark", 0.0, 0.0, false)
+    private var nearestPark = Park("DefaultPark", 0.0, 0.0)
+
+    private var progressDialog: ProgressDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,20 +67,23 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
         databaseManager = DatabaseManager(mContext)
         val dbsm = DatabaseManager(mContext)
         dbsm.loadParks()
-        parkList = dbsm.getParks()
+        parkList = ArrayList()
+       // parkList = dbsm.getParks()
         createLocationRequest()
 
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
+                Log.d("RESULT","LOC RESULT ")
                 locationResult ?: return
                 for (location in locationResult.locations) {
                     if (location != null) {
                         saveLocation(location)
-                        makeMySnackbar(location)
-                        if(parkList.isEmpty()) {
+
+                        if (parkList.isEmpty() && !dbsm.loading) {
                             parkList = dbsm.getParks()
                             addMarkers()
+                            makeMySnackbar(location)
                         }
 
                         currentLocation = LatLng(location.latitude, location.longitude)
@@ -93,14 +100,19 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
     fun makeMySnackbar(location: Location) {
         if (nearestPark.name != getNearestPark(location).name) {
             nearestPark = getNearestPark(location)
-            Snackbar.make(
-                activity!!.findViewById(android.R.id.content),
-                "${nearestPark.name} van a legközelebb. ", Snackbar.LENGTH_INDEFINITE
-            ).setAction("Útvonal") {
-                val uri = "google.navigation:q=" + nearestPark.latitude + "," + nearestPark.longitude
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-                context?.startActivity(intent)
-            }.show()
+            if (nearestPark.name == getString(R.string.loading)) {
+                showProgressDialog()
+            } else {
+                hideProgressDialog()
+                Snackbar.make(
+                    activity!!.findViewById(android.R.id.content),
+                    "${nearestPark.name} van a legközelebb. ", Snackbar.LENGTH_INDEFINITE
+                ).setAction("Útvonal") {
+                    val uri = "google.navigation:q=" + nearestPark.latitude + "," + nearestPark.longitude
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+                    context?.startActivity(intent)
+                }.show()
+            }
         }
 
     }
@@ -119,8 +131,8 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
 
     private fun getNearestPark(location: Location): Park {
         var distanceCalculator = DistanceCalculator()
-        if(parkList.size == 0)
-            return Park("Loading..",0.0,0.0,false)
+        if (parkList.size == 0)
+            return Park(getString(R.string.loading), 0.0, 0.0)
         var nearest = parkList[0]
         var distance = distanceCalculator.distanceBetween(
             LatLng(location.latitude, location.longitude),
@@ -177,7 +189,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
         mMap.setOnMyLocationClickListener(this)         //no function yet
         enableMyLocation()
         setLocation()
-        addMarkers()
+     //   addMarkers()
 
     }
 
@@ -196,17 +208,14 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
     private fun enableMyLocation() {
         if (checkPermission()) {
             mMap.isMyLocationEnabled = true
-            Log.i("MapFragmet", "LOCATION ENABLED!")
         }
     }
 
     override fun onMyLocationButtonClick(): Boolean {
-        Log.i("MapsFragment", "MyLocation button clicked")
         return false
     }
 
     override fun onMyLocationClick(p0: Location) {
-        Log.i("MapsFragment", "Current location:\n$p0")
     }
 
     private fun checkPermission(): Boolean {       //checks pesmission for ACCESS_FINE_LOCATION
@@ -231,7 +240,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
             ) {
                 enableMyLocation()
             } else {
-                Toast.makeText(mContext, "ACCESS_FINE_LOCATION permission is not granted", Toast.LENGTH_LONG).show()
+                //Toast.makeText(mContext, getString(R.string.finelocationerror), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -252,24 +261,21 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
             // All location settings are satisfied. The client can initialize
             // location requests here.
             // ...
-            Log.i("LocationRequestONSUCCES", locationSettingsResponse.toString())
         }
 
         task.addOnFailureListener { exception ->
-            if (exception is ResolvableApiException) {
-                // Location settings are not satisfied, but this can be fixed
-                // by showing the user a dialog.
-                try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
-                    exception.startResolutionForResult(
-                        activity,
-                        1
-                    )
-                } catch (sendEx: IntentSender.SendIntentException) {
-                    // Ignore the error.
-                }
+            if (exception is ResolvableApiException) try {
+                // Show the dialog by calling startResolutionForResult(),
+                // and check the result in onActivityResult().
+                exception.startResolutionForResult(
+                    activity,
+                    1
+                )
+            } catch (sendEx: IntentSender.SendIntentException) {
+                // Ignore the error.
             }
+            // Location settings are not satisfied, but this can be fixed
+            // by showing the user a dialog.
         }
     }
 
@@ -280,4 +286,24 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButton
         }
     }
 
+    fun showProgressDialog() {
+        if (progressDialog != null) {
+            return
+        }
+
+        progressDialog = ProgressDialog(context).apply {
+            setCancelable(false)
+            setMessage("Loading...")
+            show()
+        }
+    }
+
+    fun hideProgressDialog() {
+        progressDialog?.let { dialog ->
+            if (dialog.isShowing) {
+                dialog.dismiss()
+            }
+        }
+        progressDialog = null
+    }
 }
